@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, doc, setDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, doc, setDoc, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from './firebase';
 import { InternalMessage } from './types';
 import { GuestPortalScreen } from './GuestPortalScreen';
@@ -19,14 +19,23 @@ export default function App() {
   const [room, setRoom] = useState(urlRoom || '');
 
   useEffect(() => {
-    const q = query(collection(db, 'messages'), orderBy('timestamp'));
+    if (!room) {
+      setMessages([]);
+      return;
+    }
+
+    const q = query(
+      collection(db, 'messages'),
+      where('senderName', '==', `Room ${room}`),
+      orderBy('timestamp')
+    );
     const unsub = onSnapshot(q, (snap) => {
       const msgs: InternalMessage[] = [];
       snap.forEach((d) => msgs.push(d.data() as InternalMessage));
       setMessages(msgs);
     });
     return unsub;
-  }, []);
+  }, [room]);
 
   const handleAddMessage = (text: string) => {
     const fresh: InternalMessage = {
@@ -44,6 +53,7 @@ export default function App() {
         messages={messages}
         onAddMessage={handleAddMessage}
         initialRoom={room}
+        onSetRoom={(r) => setRoom(r)}
       />
     </div>
   );

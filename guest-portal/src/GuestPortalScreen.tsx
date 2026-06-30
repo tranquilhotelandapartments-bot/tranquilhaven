@@ -7,9 +7,10 @@ interface GuestPortalProps {
   messages: InternalMessage[];
   onAddMessage: (text: string) => void;
   initialRoom?: string;
+  onSetRoom?: (room: string) => void;
 }
 
-export function GuestPortalScreen({ messages, onAddMessage, initialRoom = '' }: GuestPortalProps) {
+export function GuestPortalScreen({ messages, onAddMessage, initialRoom = '', onSetRoom }: GuestPortalProps) {
   const [room, setRoom] = useState(initialRoom);
   const [input, setInput] = useState('');
   const [roomSet, setRoomSet] = useState(!!initialRoom);
@@ -28,7 +29,10 @@ export function GuestPortalScreen({ messages, onAddMessage, initialRoom = '' }: 
 
   const handleSetRoom = (e: React.FormEvent) => {
     e.preventDefault();
-    if (room.trim()) setRoomSet(true);
+    if (room.trim()) {
+      setRoomSet(true);
+      onSetRoom?.(room.trim());
+    }
   };
 
   if (!roomSet) {
@@ -83,7 +87,10 @@ export function GuestPortalScreen({ messages, onAddMessage, initialRoom = '' }: 
           <p className="text-[9px] text-white/60 font-semibold uppercase tracking-wider">Guest Chat</p>
         </div>
         <button
-          onClick={() => setRoomSet(false)}
+          onClick={() => {
+            setRoomSet(false);
+            onSetRoom?.('');
+          }}
           className="text-[9px] text-white/50 hover:text-white font-bold uppercase tracking-wider cursor-pointer transition"
         >
           Change
