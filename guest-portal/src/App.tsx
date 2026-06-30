@@ -26,7 +26,7 @@ export default function App() {
 
     const q = query(
       collection(db, 'messages'),
-      where('senderName', '==', `Room ${room}`),
+      where('roomNo', '==', room),
       orderBy('timestamp')
     );
     const unsub = onSnapshot(q, (snap) => {
@@ -43,8 +43,18 @@ export default function App() {
       senderName: room ? `Room ${room}` : 'Guest',
       text,
       timestamp: new Date().toISOString(),
+      roomNo: room || undefined,
     };
     setDoc(doc(db, 'messages', fresh.id), fresh).catch(console.error);
+
+    const reply: InternalMessage = {
+      id: `M-${Date.now()}-${Math.random().toString(36).slice(2, 6)}-reply`,
+      senderName: 'Front Desk',
+      text: 'Request sent ✓ A staff member will assist you shortly.',
+      timestamp: new Date().toISOString(),
+      roomNo: room || undefined,
+    };
+    setDoc(doc(db, 'messages', reply.id), reply).catch(console.error);
   };
 
   return (

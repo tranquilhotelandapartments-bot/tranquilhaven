@@ -3,4 +3,5 @@ export interface InternalMessage {
   senderName: string;
   text: string;
   timestamp: string;
+  roomNo?: string;
 }

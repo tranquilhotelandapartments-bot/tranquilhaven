@@ -649,6 +649,23 @@ export default function App() {
           roomNumber: msg.senderName?.replace('Room ', ''),
           requiresAcknowledgement: false
         });
+        const roomNo = msg.senderName?.replace('Room ', '');
+        const srId = `SR-msg-${msg.id}`;
+        setServiceRequests(prev => {
+          if (prev.some(sr => sr.id === srId)) return prev;
+          return [{
+            id: srId,
+            roomNo,
+            requestType: 'Guest Message',
+            details: msg.text,
+            requestedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            requestedTimeMs: Date.now(),
+            assignedStaff: 'Unassigned',
+            status: 'Pending',
+            priority: 'Normal',
+            escalationLevel: 1
+          }, ...prev];
+        });
       }
     }
   }, [messages]);
