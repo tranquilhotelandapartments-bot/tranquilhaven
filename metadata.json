@@ -1,0 +1,6 @@
+{
+  "name": "Tranquil Haven",
+  "description": "A refined, fully interactive, and visually stunning modern hotel management dashboard for reservations, rooms, and maintenance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

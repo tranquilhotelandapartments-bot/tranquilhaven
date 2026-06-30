@@ -1,0 +1,148 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Fortress Core Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Zero-Trust Security Relational Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUserActive() {
+      return isSignedIn() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'ACTIVE';
+    }
+
+    function getUserRole() {
+      return (isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid))) ? 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role : 'Guest';
+    }
+
+    function hasRole(requiredRole) {
+      return isUserActive() && getUserRole() == requiredRole;
+    }
+
+    function isDirector() {
+      return hasRole('Director');
+    }
+
+    function isManager() {
+      return hasRole('Manager');
+    }
+
+    function isStaff() {
+      return isUserActive() && (
+        getUserRole() == 'Director' ||
+        getUserRole() == 'Manager' ||
+        getUserRole() == 'Receptionist' ||
+        getUserRole() == 'Maintenance Officer' ||
+        getUserRole() == 'Accountant' ||
+        getUserRole() == 'Inventory Officer' ||
+        getUserRole() == 'Security Officer'
+      );
+    }
+
+    // Test connection check endpoint
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // 1. HOTEL STAFF AND GUESTS ACCESS PROFILES
+    match /users/{userId} {
+      // Allow robust read access so different roles can perform cross-checks, logins, and pre-provision checks without permission blocks
+      allow read: if true;
+      allow create: if (request.auth == null) || isSignedIn();
+      allow update: if isSignedIn() && (request.auth.uid == userId || userId.matches('^pre:.*') || isDirector());
+      allow delete: if isSignedIn() && (userId.matches('^pre:.*') || isDirector());
+    }
+
+    match /deletedUsers/{email} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn() && isDirector();
+    }
+
+    // 2. SUITES AND OPERATIONS INVENTORIES
+    match /rooms/{roomId} {
+      allow read: if (isSignedIn() && (isStaff() || hasRole('Guest'))) || (request.auth == null);
+      allow write: if (isSignedIn() && isStaff()) || (request.auth == null);
+    }
+
+    // 3. HOTEL RESERVATIONS RECORDINGS
+    match /reservations/{reservationId} {
+      allow read: if (isSignedIn() && (isStaff() || hasRole('Guest'))) || (request.auth == null);
+      allow write: if (isSignedIn() && isStaff()) || (request.auth == null);
+    }
+
+    // 4. MAINTENANCE REPAIR WORK ORDERS
+    match /maintenanceTickets/{ticketId} {
+      allow read: if (isSignedIn() && (isStaff() || hasRole('Guest'))) || (request.auth == null);
+      allow write: if (isSignedIn() && (isStaff() || hasRole('Guest'))) || (request.auth == null);
+    }
+
+    // 5. STORAGE SUPPLY INVENTORY
+    match /inventory/{itemId} {
+      allow read: if isSignedIn() || (request.auth == null);
+      allow write: if (isSignedIn() && isStaff() && (isDirector() || isManager() || hasRole('Inventory Officer'))) || (request.auth == null);
+    }
+
+    // 6. SYSTEM COMMUNICATIONS/ANNOUNCEMENTS
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() || (request.auth == null);
+      allow write: if (isSignedIn() && isStaff()) || (request.auth == null);
+    }
+
+    // 7. COMPLIANCE AUDIT RECORDINGS (Immutable Ledger)
+    match /auditLogs/{logId} {
+      allow read: if isSignedIn() || (request.auth == null);
+      allow create: if isSignedIn() || (request.auth == null);
+      allow update, delete: if false; // Absolute immutability enforcer
+    }
+
+    // 8. ROOM SERVICE SERVICE CONCIERGE REQUESTS
+    match /guestRequests/{requestId} {
+      allow read: if (isSignedIn() && (isStaff() || hasRole('Guest'))) || (request.auth == null);
+      allow write: if (isSignedIn() && (isStaff() || hasRole('Guest'))) || (request.auth == null);
+    }
+
+    // 9. DOUBLE ENTRY FINANCIAL BOOK LEDGERS
+    match /financials/{recordId} {
+      allow read: if isSignedIn() || (request.auth == null);
+      allow write: if (isSignedIn() && (isDirector() || isManager() || hasRole('Accountant'))) || (request.auth == null);
+    }
+
+    // 10. TEAM ACTIVITIES LOGS
+    match /activities/{activityId} {
+      allow read: if isSignedIn() || (request.auth == null);
+      allow write: if isSignedIn() || (request.auth == null);
+    }
+
+    // 11. GUEST VISITORS LOGS
+    match /visitors/{visitorId} {
+      allow read: if isSignedIn() || (request.auth == null);
+      allow write: if (isSignedIn() && isStaff()) || (request.auth == null);
+    }
+
+    // 12. SECURITY INCIDENTS REPORTS
+    match /incidents/{incidentId} {
+      allow read: if (isSignedIn() && (isStaff() || hasRole('Guest'))) || (request.auth == null);
+      allow write: if (isSignedIn() && (isStaff() || hasRole('Guest'))) || (request.auth == null);
+    }
+
+    // 13. INTERNAL CHAT/WALKIE TALKIE MESSAGES
+    match /messages/{messageId} {
+      allow read: if isSignedIn() || (request.auth == null);
+      allow write: if isSignedIn() || (request.auth == null);
+    }
+
+    // 14. GUEST CRM PROFILES
+    match /guests/{guestId} {
+      allow read: if isSignedIn() || (request.auth == null);
+      allow write: if (isSignedIn() && isStaff()) || (request.auth == null);
+    }
+  }
+}

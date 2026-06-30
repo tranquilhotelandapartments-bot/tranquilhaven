@@ -1,0 +1,188 @@
+{
+  "entities": {
+    "user": {
+      "title": "Hotel Staff Profile",
+      "description": "Information regarding Tranquil Haven hotel staff or guests and their access roles.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "fullName": { "type": "string", "description": "Legal/display name" },
+        "email": { "type": "string", "description": "User email address" },
+        "role": { "type": "string", "enum": ["Director", "Manager", "Receptionist", "Maintenance Officer", "Accountant", "Inventory Officer", "Security Officer", "Guest"] },
+        "status": { "type": "string", "enum": ["ACTIVE", "SUSPENDED", "DISABLED"] },
+        "branchId": { "type": "string", "description": "Active branch location ID" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string", "description": "UID of Creator" }
+      },
+      "required": ["uid", "fullName", "email", "role", "status"]
+    },
+    "room": {
+      "title": "Hotel Room",
+      "description": "Details, state, and cleaning queues of hotel rooms",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string", "enum": ["Vacant", "Dirty", "Occupied", "Out of Order"] },
+        "subStatus": { "type": "string" },
+        "guestName": { "type": "string" },
+        "floor": { "type": "string", "enum": ["1st Floor", "2nd Floor", "3rd Floor", "Penthouse"] },
+        "notes": { "type": "string" },
+        "lastOccupiedDate": { "type": "string" },
+        "lastCheckoutDate": { "type": "string" },
+        "lastCleanedDate": { "type": "string" }
+      },
+      "required": ["id", "type", "status", "subStatus", "floor"]
+    },
+    "reservation": {
+      "title": "Guest Reservation",
+      "description": "Hotel check-in logs and date ranges",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "guestName": { "type": "string" },
+        "guestAvatar": { "type": "string" },
+        "roomNo": { "type": "string" },
+        "roomType": { "type": "string" },
+        "checkInDate": { "type": "string" },
+        "checkOutDate": { "type": "string" },
+        "dateRange": { "type": "string" },
+        "numGuests": { "type": "number" },
+        "status": { "type": "string", "enum": ["EXPECTED", "CHECKED_IN", "CHECKING_OUT", "COMPLETED"] },
+        "checkedInTime": { "type": "string" }
+      },
+      "required": ["id", "guestName", "roomNo", "roomType", "checkInDate", "checkOutDate", "status"]
+    },
+    "maintenanceTicket": {
+      "title": "Maintenance Ticket",
+      "description": "Engineering repair orders and cleaners turnaround tasks",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "location": { "type": "string" },
+        "issue": { "type": "string" },
+        "type": { "type": "string", "enum": ["plumbing", "light_off", "wifi_off", "build", "monitoring", "cleaning_services"] },
+        "category": { "type": "string", "enum": ["Urgent", "Routine", "Facility"] },
+        "status": { "type": "string", "enum": ["ACTIVE", "RESOLVED"] },
+        "reportedTime": { "type": "string" },
+        "assignedStaff": { "type": "string" }
+      },
+      "required": ["id", "location", "issue", "type", "category", "status"]
+    },
+    "inventoryItem": {
+      "title": "Inventory Supply Item",
+      "description": "Linen, items, and kitchen restock logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["Housekeeping", "Kitchen", "Restaurant", "Bar", "Maintenance"] },
+        "stockCount": { "type": "number" },
+        "minLimit": { "type": "number" },
+        "price": { "type": "number" },
+        "expiryDate": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "stockCount", "minLimit", "price"]
+    },
+    "notification": {
+      "title": "System Notification",
+      "description": "Hierarchical operations notification alert logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "text": { "type": "string" },
+        "urgency": { "type": "string", "enum": ["VIP", "Emergency", "Critical", "SLA", "Normal"] },
+        "level": { "type": "number" },
+        "timestamp": { "type": "string" },
+        "acknowledgedBy": { "type": "array" }
+      },
+      "required": ["id", "title", "text", "urgency", "level", "timestamp"]
+    },
+    "auditLog": {
+      "title": "System Audit Log",
+      "description": "Immutable security logs of operational updates, claims changes, and financials approvals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "staffName": { "type": "string" },
+        "staffEmail": { "type": "string" },
+        "action": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "details": { "type": "string" }
+      },
+      "required": ["id", "staffName", "staffEmail", "action", "timestamp"]
+    },
+    "guestRequest": {
+      "title": "Service Concierge Request",
+      "description": "Guest requests logs and escalation queues",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "roomNo": { "type": "string" },
+        "requestType": { "type": "string" },
+        "details": { "type": "string" },
+        "requestedAt": { "type": "string" },
+        "requestedTimeMs": { "type": "number" },
+        "assignedStaff": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Accepted", "In Progress", "Delivered", "Closed"] },
+        "priority": { "type": "string", "enum": ["Normal", "Attention Needed", "Overdue", "Critical"] },
+        "escalationLevel": { "type": "number" }
+      },
+      "required": ["id", "roomNo", "requestType", "requestedAt", "requestedTimeMs", "status", "priority", "escalationLevel"]
+    },
+    "financialRecord": {
+      "title": "Double Entry General Ledger",
+      "description": "Accounting transaction entries record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["Revenue", "Expense"] },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Approved", "Pending Approval"] }
+      },
+      "required": ["id", "type", "amount", "category", "timestamp", "description", "status"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "user",
+      "description": "Collection of staff and administrators registered profiles"
+    },
+    "rooms": {
+      "schema": "room",
+      "description": "Collection of hotel suite status trackers"
+    },
+    "reservations": {
+      "schema": "reservation",
+      "description": "Hotel check-in registrations records"
+    },
+    "maintenanceTickets": {
+      "schema": "maintenanceTicket",
+      "description": "Actionable technical incident repair tickets"
+    },
+    "inventory": {
+      "schema": "inventoryItem",
+      "description": "Supply room linen and items lists"
+    },
+    "notifications": {
+      "schema": "notification",
+      "description": "Hotel broadcast notifications feed"
+    },
+    "auditLogs": {
+      "schema": "auditLog",
+      "description": "Security compliance logs"
+    },
+    "guestRequests": {
+      "schema": "guestRequest",
+      "description": "Active hotel and spa room service requests"
+    },
+    "financials": {
+      "schema": "financialRecord",
+      "description": "Double entry transaction audit books ledger"
+    }
+  }
+}
