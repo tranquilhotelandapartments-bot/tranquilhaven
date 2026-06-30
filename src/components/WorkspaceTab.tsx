@@ -996,7 +996,7 @@ export default function WorkspaceTab() {
                         type="button"
                         onClick={() => selectEmailPreset(
                           'jomasonbatson@gmail.com',
-                          'Tranquil Haven Resort - Daily Audit Notification Log',
+                          'TRANQUIL HAVEN - Daily Audit Notification Log',
                           `Dear Director,\n\nThis is an automated operational notification. The daily turnarounds, financial logs, and inventory parameters are verified and balanced.\n\nWarm regards,\nTranquil Workspace Auto-Log`
                         )}
                         className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-[9.5px] font-bold rounded-md transition-all border border-zinc-200 cursor-pointer"
@@ -1007,7 +1007,7 @@ export default function WorkspaceTab() {
                         type="button"
                         onClick={() => selectEmailPreset(
                           'julianne.moore@vip.com',
-                          'Welcome back to Tranquil Haven Resort, VIP Moore',
+                          'Welcome back to TRANQUIL HAVEN, VIP Moore',
                           `Dear Julianne Moore,\n\nWe are excited for your upcoming check-in. Your Penthouse Suite 402 is fully prioritized and prepared with requested extra feather pillows.\n\nBest regards,\nFront Desk Guest Services`
                         )}
                         className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-[9.5px] font-bold rounded-md transition-all border border-zinc-200 cursor-pointer"

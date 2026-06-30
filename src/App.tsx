@@ -956,7 +956,7 @@ export default function App() {
 
     // Automatically compose WhatsApp Portal invitation message
     const secureLink = buildGuestPortalLink(guest.checkedInRoom || '402', guest.fullName, guest.id, guest.phone);
-    const smsMessage = `Hello ${guest.fullName}, welcome to Tranquil Haven Resort! Your checked-in room is Room ${guest.checkedInRoom || '402'}. Click the secure link to instantly launch your personalized digital guest mobile portal to request butler services, check out, or chat with us online: ${secureLink}`;
+    const smsMessage = `Hello ${guest.fullName}, welcome to TRANQUIL HAVEN! Your checked-in room is Room ${guest.checkedInRoom || '402'}. Click the secure link to instantly launch your personalized digital guest mobile portal to request butler services, check out, or chat with us online: ${secureLink}`;
 
     setWhatsappModalData({
       guestName: guest.fullName,
@@ -1077,7 +1077,7 @@ export default function App() {
     };
 
     const secureLink = buildGuestPortalLink(roomNo, guestName, matchedGuest.id, matchedGuest.phone);
-    const smsMessage = `Hello ${guestName}, welcome to Tranquil Haven Resort! Your keys are active for Room ${roomNo}. Get instant access to request room services, check out, or message your personal hotel butler by tapping this link: ${secureLink}`;
+    const smsMessage = `Hello ${guestName}, welcome to TRANQUIL HAVEN! Your keys are active for Room ${roomNo}. Get instant access to request room services, check out, or message your personal hotel butler by tapping this link: ${secureLink}`;
 
     setWhatsappModalData({
       guestName: guestName,

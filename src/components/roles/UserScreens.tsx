@@ -2474,7 +2474,7 @@ export function ReceptionistScreen({
 
     // Auto dispatch Receipt WhatsApp redirect link
     const cleanPhone = walkinPhone.replace(/\D/g, '');
-    const thankYouText = `Dear ${walkinName},\n\nThank you for choosing Tranquil Haven Resort! We are absolutely delighted to welcome you to our oasis of comfort and serenity. 🌸\n\nHere is your digital check-in receipt:\n- Room: Suite ${selectedRoomId}\n- Rate: UGX ${priceAmount.toLocaleString()}\n- Receipt No: ${receiptId}\n- Check-In Time: ${new Date().toLocaleString()}\n\nWe look forward to ensuring your stay is incredibly relaxing and memorable. Please do not hesitate to contact our Concierge Desk if you need anything at all.\n\nWarmest regards,\nTranquil Haven Front Desk Team ✨`;
+    const thankYouText = `Dear ${walkinName},\n\nThank you for choosing TRANQUIL HAVEN! We are absolutely delighted to welcome you to our oasis of comfort and serenity. 🌸\n\nHere is your digital check-in receipt:\n- Room: Suite ${selectedRoomId}\n- Rate: UGX ${priceAmount.toLocaleString()}\n- Receipt No: ${receiptId}\n- Check-In Time: ${new Date().toLocaleString()}\n\nWe look forward to ensuring your stay is incredibly relaxing and memorable. Please do not hesitate to contact our Concierge Desk if you need anything at all.\n\nWarmest regards,\nTRANQUIL HAVEN Front Desk Team ✨`;
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(thankYouText)}`;
     
     setLastWhatsAppUrl(whatsappUrl);
@@ -2774,7 +2774,7 @@ export function ReceptionistScreen({
 
                   <div className="pt-2.5 border-t border-dashed border-zinc-200">
                     <a
-                      href={`https://api.whatsapp.com/send?phone=${foundGuest.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Hello ${foundGuest.fullName}, welcome to Tranquil Haven Resort! Your checked-in room is Room ${foundGuest.checkedInRoom || '402'}. Click the secure link to instantly launch your personalized digital guest mobile portal: ${window.location.origin}${window.location.pathname}?role=Guest&room=${foundGuest.checkedInRoom || '402'}&guest=${encodeURIComponent(foundGuest.fullName)}&guestId=${foundGuest.id}&phone=${encodeURIComponent(foundGuest.phone)}`)}`}
+                      href={`https://api.whatsapp.com/send?phone=${foundGuest.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Hello ${foundGuest.fullName}, welcome to TRANQUIL HAVEN! Your checked-in room is Room ${foundGuest.checkedInRoom || '402'}. Click the secure link to instantly launch your personalized digital guest mobile portal: ${window.location.origin}${window.location.pathname}?role=Guest&room=${foundGuest.checkedInRoom || '402'}&guest=${encodeURIComponent(foundGuest.fullName)}&guestId=${foundGuest.id}&phone=${encodeURIComponent(foundGuest.phone)}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full inline-flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#20ba5a] text-white text-[10px] font-black uppercase tracking-wider py-2 px-3 rounded-lg cursor-pointer transition-colors shadow-sm"
