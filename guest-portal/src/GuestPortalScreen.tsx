@@ -1,282 +1,147 @@
-import { useState } from 'react';
-import { Send } from 'lucide-react';
-import { motion } from 'motion/react';
-import { GuestCRM, InternalMessage, MaintenanceTicket, SystemNotification } from './types';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Hotel } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { InternalMessage } from './types';
 
 interface GuestPortalProps {
   messages: InternalMessage[];
-  guests: GuestCRM[];
   onAddMessage: (text: string) => void;
-  onPostMaintenanceTicket: (t: MaintenanceTicket) => void;
-  onAddNotification: (n: SystemNotification) => void;
-  onPostServiceRequest?: (roomNo: string, requestType: string, details?: string) => void;
+  initialRoom?: string;
 }
 
-export function GuestPortalScreen({
-  messages,
-  guests,
-  onAddMessage,
-  onPostMaintenanceTicket,
-  onAddNotification,
-  onPostServiceRequest,
-}: GuestPortalProps) {
-  const fallbackGuest: GuestCRM = {
-    id: 'TH-2026-TEMP',
-    fullName: 'Guest User',
-    phone: '+1 (555) 555-5555',
-    email: 'guest@tranquilhaven.com',
-    passport: 'US-AA000000',
-    nationalId: 'NID-000000',
-    emergencyContact: 'None',
-    loyaltyPoints: 0,
-    spendingHistory: 0,
-    checkedInRoom: '402',
-    historyLogs: []
-  };
+export function GuestPortalScreen({ messages, onAddMessage, initialRoom = '' }: GuestPortalProps) {
+  const [room, setRoom] = useState(initialRoom);
+  const [input, setInput] = useState('');
+  const [roomSet, setRoomSet] = useState(!!initialRoom);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const activeGuest = guests[0] || fallbackGuest;
-  const [reqService, setReqService] = useState('');
-  const [guestInboxInput, setGuestInboxInput] = useState('');
-  const [ratings, setRatings] = useState(5);
-  const [feedbackText, setFeedbackText] = useState('');
-  const [activeSection, setActiveSection] = useState<string>('all');
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  const handleSendChat = (e: React.FormEvent) => {
+  const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!guestInboxInput.trim()) return;
-
-    onAddMessage(guestInboxInput);
-    const guestQuery = guestInboxInput;
-    setGuestInboxInput('');
-
-    setTimeout(() => {
-      let botText = "Thank you for contacting Tranquil Haven Butler Team. Your prompt has been logged, we will fulfill this in under 10 minutes.";
-      if (guestQuery.toLowerCase().includes('wifi') || guestQuery.toLowerCase().includes('internet')) {
-        botText = "The secure high-speed Wi-Fi access SSID is 'Tranquil_Haven_VIP' and secure passcode is 'havenlyComfort2026'.";
-      } else if (guestQuery.toLowerCase().includes('towel') || guestQuery.toLowerCase().includes('linen')) {
-        botText = "Linen request received. Our cleaner James Chen has been dispatched with pristine organic cotton towels pack.";
-      } else if (guestQuery.toLowerCase().includes('coffee') || guestQuery.toLowerCase().includes('food')) {
-        botText = "Your artisanal coffee delivery is currently being prepared by the barista. Expect room arrival shortly.";
-      }
-
-      onAddMessage(`Tranquil Haven Bot: ${botText}`);
-    }, 1200);
+    if (!input.trim() || !roomSet) return;
+    onAddMessage(input.trim());
+    setInput('');
   };
 
-  const handleRequestService = (service: string) => {
-    const ticket: MaintenanceTicket = {
-      id: `TCK-${Date.now().toString().slice(-4)}`,
-      location: `Room ${activeGuest.checkedInRoom || '402'}`,
-      issue: `Guest Requested Service: ${service}`,
-      type: 'cleaning_services',
-      category: 'Routine',
-      status: 'ACTIVE',
-      reportedTime: 'Just now',
-      assignedStaff: 'Unassigned'
-    };
-
-    onPostMaintenanceTicket(ticket);
-
-    onAddNotification({
-      id: `N-${Date.now()}`,
-      title: 'Guest Service Request',
-      text: `${activeGuest.fullName} in suite ${activeGuest.checkedInRoom || '402'} requested '${service}'. Housekeeping queue updated.`,
-      urgency: 'Normal',
-      level: 1,
-      timestamp: 'Just now',
-      acknowledgedBy: []
-    });
-
-    alert(`Standard request dispatched: ${service}. Staff notified!`);
+  const handleSetRoom = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (room.trim()) setRoomSet(true);
   };
 
-  const handleSendFeedback = () => {
-    if (!feedbackText.trim()) return;
-    alert(`Thank you for your rating of ${ratings} stars! Sincere comments log saved.`);
-    setFeedbackText('');
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-md mx-auto bg-surface-container-lowest border border-[#eae8e4] p-5 rounded-[40px] shadow-2xl relative my-4 w-full"
-    >
-      <div className="w-32 h-5 bg-black rounded-full mx-auto mb-4 relative flex items-center justify-center">
-        <span className="w-1.5 h-1.5 bg-zinc-800 rounded-full block mr-10" />
-      </div>
-
-      <div className="space-y-5">
-
-        <div className="text-center pb-3 border-b border-[#f4f1ee]">
-          <span className="text-[9px] font-black uppercase text-[#a89078] tracking-[0.3em] block">Tranquil Haven Mobile Portal</span>
-          <h3 className="font-display font-black text-xl text-black">Guest Digital Ledger</h3>
-          <p className="text-[10px] text-zinc-400 font-mono">Welcome back, {activeGuest.fullName}</p>
-        </div>
-
-        <div className="bg-[#faf9f6]/80 border border-[#e6decb] p-3 rounded-2xl shadow-xs space-y-1.5">
-          <span className="text-[8px] font-black uppercase text-[#a89078] tracking-[0.2em] font-display block text-center">Service Navigator</span>
-          <select
-            value={activeSection}
-            onChange={(e) => setActiveSection(e.target.value)}
-            className="bg-white border border-zinc-200 rounded-lg py-2 px-2.5 text-xs font-black uppercase text-zinc-850 outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer w-full text-center"
-          >
-            <option value="all">Show All Amenities</option>
-            <option value="profile">Room & Stay profile information</option>
-            <option value="amenities">Request Guest Service Amenities</option>
-            <option value="butler-chat">Direct Butler Live Thread</option>
-            <option value="feedback">Settle Departure Feedback</option>
-          </select>
-        </div>
-
-        {(activeSection === 'all' || activeSection === 'profile') && (
-        <div className="bg-[#f5f0eb] border border-black/10 rounded-2xl p-4 space-y-2.5">
-          <div className="flex justify-between items-center">
-            <span className="text-[11px] font-black uppercase text-zinc-700 tracking-wider font-display">Assigned Quarters</span>
-            <span className="text-sm font-display font-black tracking-widest text-[#a89078]">SUITE {activeGuest.checkedInRoom || '402'}</span>
+  if (!roomSet) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-sm mx-auto bg-white border border-[#eae8e4] p-8 rounded-[32px] shadow-xl relative w-full"
+      >
+        <div className="flex flex-col items-center gap-5 text-center">
+          <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center">
+            <Hotel className="w-7 h-7 text-white" />
           </div>
-          <div className="text-xs space-y-1 text-zinc-700 font-sans font-medium">
-            <p>Reservation Status: <span className="font-bold text-emerald-800">Checked In</span></p>
-            <p>Loyalty tier: <span className="text-amber-800 font-bold">Elite Black Label ({activeGuest.loyaltyPoints} PTS)</span></p>
-            <p>Access SSID: <span className="font-mono bg-white px-1.5 rounded border border-zinc-200">Tranquil_Haven_VIP</span></p>
+          <div>
+            <h2 className="font-black text-xl text-black">Welcome</h2>
+            <p className="text-xs text-zinc-500 mt-1">Enter your room to start chatting</p>
           </div>
-        </div>
-        )}
-
-        {(activeSection === 'all' || activeSection === 'amenities') && (
-        <div id="guest-service-request-box" className="bg-[#fbfcfa] border border-zinc-200 rounded-2xl p-4.5 space-y-3 shadow-xs">
-          <span className="text-[10px] font-black uppercase text-zinc-700 tracking-wider font-display block">
-            Request Guest Service Amenities
-          </span>
-          <div className="space-y-2.5">
-            <div className="space-y-1">
-              <label className="text-[9px] text-zinc-500 uppercase font-black">Amenity Type</label>
-              <select
-                value={reqService}
-                onChange={(e) => setReqService(e.target.value)}
-                className="w-full bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold font-sans outline-none focus:ring-1 focus:ring-zinc-400"
-              >
-                <option value="">-- Choose Amenity --</option>
-                <option value="Tea">Tea</option>
-                <option value="Coffee">Coffee</option>
-                <option value="Food">Food (Room Service Order)</option>
-                <option value="Water">Water (Still/Sparkling)</option>
-                <option value="Laundry">Laundry Service</option>
-                <option value="Extra Towels">Extra Towels Pack</option>
-                <option value="Room Cleaning">Room Cleaning Turnaround</option>
-                <option value="Airport Pickup">Airport Pickup Dispatch</option>
-                <option value="Maintenance Assistance">Maintenance Technical Assistance</option>
-                <option value="Custom Requests">Custom Request (Describe below)</option>
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[9px] text-zinc-500 uppercase font-black block">Special Directions / Custom request details</label>
-              <input
-                type="text"
-                id="guest-request-details"
-                placeholder="E.g. Extra sugar, hot milk, or custom details..."
-                className="w-full bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-xs"
-              />
-            </div>
-
-            <button
-              onClick={() => {
-                const selectElement = reqService;
-                if (!selectElement) {
-                  alert('Please choose an amenity from the dropdown.');
-                  return;
-                }
-                const detailsInput = (document.getElementById('guest-request-details') as HTMLInputElement)?.value || '';
-
-                if (onPostServiceRequest) {
-                  onPostServiceRequest(activeGuest.checkedInRoom || '402', selectElement, detailsInput);
-                } else {
-                  handleRequestService(`${selectElement} (${detailsInput})`);
-                }
-
-                setReqService('');
-                if (document.getElementById('guest-request-details')) {
-                  (document.getElementById('guest-request-details') as HTMLInputElement).value = '';
-                }
-                alert('Service request dispatched to hotel desk! Fulfilling in under 10 minutes.');
-              }}
-              className="w-full bg-black hover:bg-zinc-800 text-white font-extrabold text-[10px] uppercase tracking-wider py-2.5 rounded-xl transition cursor-pointer"
-            >
-              Request Service Button
-            </button>
-          </div>
-        </div>
-        )}
-
-        {(activeSection === 'all' || activeSection === 'butler-chat') && (
-        <div className="border border-[#f4f1ee] rounded-2.5xl p-3 bg-zinc-50 flex flex-col h-[200px]">
-          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">Direct Butler Live Thread</span>
-
-          <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 my-1.5 text-[10px]">
-            {messages.slice(-4).map((m, t) => (
-              <div key={t} className={`flex flex-col ${m.senderName === activeGuest.fullName ? 'items-end' : 'items-start'}`}>
-                <span className="text-[7.5px] text-zinc-400 font-bold">{m.senderName}</span>
-                <p className={`p-2 rounded-lg max-w-[80%] font-sans font-medium leading-relaxed ${
-                  m.senderName === activeGuest.fullName ? 'bg-black text-[#f5f0eb] rounded-tr-none' : 'bg-neutral-150 text-zinc-800 rounded-tl-none'
-                }`}>
-                  {m.text}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <form onSubmit={handleSendChat} className="flex gap-1">
+          <form onSubmit={handleSetRoom} className="w-full space-y-3">
             <input
               type="text"
-              placeholder="Ask the desk butler..."
-              value={guestInboxInput}
-              onChange={(e) => setGuestInboxInput(e.target.value)}
-              className="flex-1 bg-white border border-zinc-200 rounded-lg px-2.5 text-[10.5px] outline-none"
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
+              placeholder="Room number (e.g. 402)"
+              className="w-full bg-[#f5f5f5] border border-zinc-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-black/10 text-center"
+              autoFocus
             />
             <button
               type="submit"
-              className="bg-black text-white p-1 rounded-lg cursor-pointer"
+              disabled={!room.trim()}
+              className="w-full bg-black hover:bg-zinc-800 disabled:bg-zinc-300 text-white font-extrabold text-xs uppercase tracking-wider py-3 rounded-xl transition cursor-pointer disabled:cursor-not-allowed"
             >
-              <Send className="w-3 h-3" />
+              Join Chat
             </button>
           </form>
         </div>
-        )}
+      </motion.div>
+    );
+  }
 
-        {(activeSection === 'all' || activeSection === 'feedback') && (
-        <div className="bg-[#fcf9f6] border border-zinc-200 rounded-2xl p-4.5 space-y-3">
-          <span className="text-[9.5px] font-extrabold uppercase text-zinc-700 tracking-wider font-display block">Settle Feedback</span>
-          <div className="flex gap-1">
-            {[1, 2, 3, 4, 5].map(st => (
-              <button
-                key={st}
-                onClick={() => setRatings(st)}
-                className={`text-sm cursor-pointer transition-all ${ratings >= st ? 'text-amber-500' : 'text-zinc-350'}`}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-1">
-            <input
-              type="text"
-              placeholder="Your comments..."
-              value={feedbackText}
-              onChange={(e) => setFeedbackText(e.target.value)}
-              className="flex-1 bg-white border border-zinc-200 px-3 py-1 text-xs rounded"
-            />
-            <button
-              onClick={handleSendFeedback}
-              className="bg-black hover:bg-neutral-800 text-[#f5f0eb] border-none text-[10px] uppercase font-black tracking-wide px-3 rounded cursor-pointer"
-            >
-              Save
-            </button>
-          </div>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-sm mx-auto bg-white border border-[#eae8e4] rounded-[32px] shadow-xl relative w-full flex flex-col h-[600px]"
+    >
+      <div className="bg-black text-white px-5 py-4 rounded-t-[32px] flex items-center gap-3">
+        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+          <Hotel className="w-4 h-4 text-white" />
         </div>
-        )}
-
+        <div className="flex-1">
+          <p className="text-sm font-black tracking-tight">Room {room}</p>
+          <p className="text-[9px] text-white/60 font-semibold uppercase tracking-wider">Guest Chat</p>
+        </div>
+        <button
+          onClick={() => setRoomSet(false)}
+          className="text-[9px] text-white/50 hover:text-white font-bold uppercase tracking-wider cursor-pointer transition"
+        >
+          Change
+        </button>
       </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-2.5 bg-[#faf9f6]">
+        {messages.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-xs text-zinc-400 font-medium">Send a message to get started</p>
+          </div>
+        )}
+        <AnimatePresence initial={false}>
+          {messages.map((msg, i) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              className={`flex flex-col ${msg.senderName === `Room ${room}` ? 'items-end' : 'items-start'}`}
+            >
+              <span className="text-[8px] text-zinc-400 font-bold uppercase px-1 mb-0.5">
+                {msg.senderName}
+              </span>
+              <div
+                className={`px-3.5 py-2 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
+                  msg.senderName === `Room ${room}`
+                    ? 'bg-black text-white rounded-br-sm'
+                    : 'bg-white border border-zinc-200 text-zinc-800 rounded-bl-sm shadow-xs'
+                }`}
+              >
+                {msg.text}
+              </div>
+              <span className="text-[7px] text-zinc-300 font-mono mt-0.5 px-1">
+                {msg.timestamp}
+              </span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        <div ref={chatEndRef} />
+      </div>
+
+      <form onSubmit={handleSend} className="p-3 border-t border-[#f0eeeb] flex gap-2 bg-white rounded-b-[32px]">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type your request..."
+          className="flex-1 bg-[#f5f5f5] border border-zinc-200 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:ring-2 focus:ring-black/10"
+          autoFocus
+        />
+        <button
+          type="submit"
+          disabled={!input.trim()}
+          className="bg-black hover:bg-zinc-800 disabled:bg-zinc-300 text-white p-2.5 rounded-xl transition cursor-pointer disabled:cursor-not-allowed"
+        >
+          <Send className="w-4 h-4" />
+        </button>
+      </form>
     </motion.div>
   );
 }
