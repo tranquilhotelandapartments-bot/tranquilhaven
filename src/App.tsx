@@ -621,6 +621,37 @@ export default function App() {
   };
 
   const overdueSoundedIdsRef = useRef<Record<string, boolean>>({});
+  const notifiedGuestMsgIdsRef = useRef<Set<string>>(new Set(
+    messages.filter(m => !m.senderRole && m.senderName?.startsWith('Room ')).map(m => m.id)
+  ));
+
+  // Notify staff when new guest messages arrive from the external guest portal
+  useEffect(() => {
+    const guestMessages = messages.filter(m =>
+      !m.senderRole && m.senderName?.startsWith('Room ')
+    );
+    for (const msg of guestMessages) {
+      if (!notifiedGuestMsgIdsRef.current.has(msg.id)) {
+        notifiedGuestMsgIdsRef.current.add(msg.id);
+        playNotificationSound('newItem');
+        triggerSimulatedNotification(
+          `New Message from ${msg.senderName}`,
+          msg.text
+        );
+        addNotification({
+          id: `N-guest-msg-${msg.id}`,
+          title: `Guest Message: ${msg.senderName}`,
+          message: msg.text,
+          type: 'service_request',
+          priority: 'MEDIUM',
+          targetRoles: ['Receptionist', 'Manager', 'Director'],
+          targetUsers: [],
+          roomNumber: msg.senderName?.replace('Room ', ''),
+          requiresAcknowledgement: false
+        });
+      }
+    }
+  }, [messages]);
 
   // Real-time timers for ticking & sound alarms
   useEffect(() => {
