@@ -64,6 +64,7 @@ import {
   MaintenanceScreen, AccountantScreen, InventoryScreen, SecurityScreen, 
   GuestPortalScreen 
 } from './components/roles/UserScreens';
+import AiMessageGenerator from './components/AiMessageGenerator';
 
 // Styling utilities
 import { 
@@ -1749,6 +1750,19 @@ export default function App() {
                   </div>
                 </div>
               )}
+
+              {mobileTab === 'more' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center border-b border-zinc-100 pb-3">
+                    <div>
+                      <h2 className="font-display font-black text-lg text-black uppercase tracking-wide">AI Message Generator</h2>
+                      <p className="text-xs text-zinc-500 font-sans mt-0.5">Generate payment confirmation messages</p>
+                    </div>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-1 rounded font-black font-mono">TOOL</span>
+                  </div>
+                  <AiMessageGenerator />
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -1800,10 +1814,10 @@ export default function App() {
 
           <button 
             onClick={() => setMobileTab('more')}
-            className={`flex flex-col items-center gap-1 p-1 transition-all cursor-pointer border-none bg-transparent ${mobileTab === 'more' ? 'text-[#a89078] scale-105' : 'text-zinc-400 hover:text-zinc-650'}`}
+            className={`flex flex-col items-center gap-1 p-1 transition-all cursor-pointer border-none bg-transparent ${mobileTab === 'more' ? 'text-emerald-600 scale-105' : 'text-zinc-400 hover:text-zinc-600'}`}
           >
-            <Menu className="w-5 h-5" />
-            <span className="text-[8.5px] font-bold uppercase tracking-wider">More</span>
+            <MessageSquare className="w-5 h-5" />
+            <span className="text-[8.5px] font-bold uppercase tracking-wider">AI Msg</span>
           </button>
         </nav>
       </div>
