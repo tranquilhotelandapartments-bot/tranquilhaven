@@ -15,6 +15,7 @@ import {
 } from '../../types';
 import { useNotificationSystem } from '../../context/NotificationContext';
 import RoomsTab from '../RoomsTab';
+import AiMessageGenerator from '../AiMessageGenerator';
 import { 
   Building2, Check, Plus, Search, Trash2, AlertCircle, RefreshCw, 
   Send, CheckCircle, Clock, MapPin, Printer, Download, QrCode, 
@@ -453,6 +454,7 @@ export function DirectorScreen({
   const [activityFilter, setActivityFilter] = useState<string>('all');
   const [activitySearch, setActivitySearch] = useState<string>('');
   const [simulatedDashboard, setSimulatedDashboard] = useState<string | null>(null);
+  const [showAiMsgGen, setShowAiMsgGen] = useState(false);
 
   const { updateUserRole, toggleUserSuspension, postAuditLog, deleteUserAccount } = useAuth();
   const [liveUsersList, setLiveUsersList] = useState<any[]>([]);
@@ -1514,6 +1516,22 @@ export function DirectorScreen({
             </div>
           </div>
         </div>
+
+        {/* AI Message Generator Toggle */}
+        <div className="border-t border-zinc-200 pt-6 mt-6">
+          <button
+            onClick={() => setShowAiMsgGen(!showAiMsgGen)}
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+          >
+            <MessageSquare className="w-4 h-4" />
+            {showAiMsgGen ? 'Close AI Message Generator' : 'AI Message Generator'}
+          </button>
+          {showAiMsgGen && (
+            <div className="mt-6">
+              <AiMessageGenerator />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1565,6 +1583,7 @@ export function ManagerScreen({
   const [msgInput, setMsgInput] = useState('');
   const { deleteNotification } = useNotificationSystem();
   const [selectedTopic, setSelectedTopic] = useState<'ops' | 'rooms' | 'housekeeping' | 'tickets' | 'inventory'>('ops');
+  const [showAiMsgGen, setShowAiMsgGen] = useState(false);
 
   // Manual stock management states
   const [invAction, setInvAction] = useState<'list' | 'buy' | 'add_new'>('list');
@@ -2285,6 +2304,22 @@ export function ManagerScreen({
             )}
           </div>
         </div>
+
+        {/* AI Message Generator Toggle */}
+        <div className="border-t border-zinc-200 pt-6 mt-6">
+          <button
+            onClick={() => setShowAiMsgGen(!showAiMsgGen)}
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+          >
+            <MessageSquare className="w-4 h-4" />
+            {showAiMsgGen ? 'Close AI Message Generator' : 'AI Message Generator'}
+          </button>
+          {showAiMsgGen && (
+            <div className="mt-6">
+              <AiMessageGenerator />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -2344,6 +2379,7 @@ export function ReceptionistScreen({
   const [selectedRoomId, setSelectedRoomId] = useState('');
   const [walkinPrice, setWalkinPrice] = useState('350000');
   const [lastWhatsAppUrl, setLastWhatsAppUrl] = useState<string | null>(null);
+  const [showAiMsgGen, setShowAiMsgGen] = useState(false);
 
   // Invoice parameters
   const [activeReceipt, setActiveReceipt] = useState<{ id: string; guest: string; room: string; amount: number; time: string } | null>(null);
@@ -2924,6 +2960,21 @@ export function ReceptionistScreen({
 
       </div>
 
+      {/* AI Message Generator Toggle */}
+      <div className="border-t border-zinc-200 pt-6 mt-6">
+        <button
+          onClick={() => setShowAiMsgGen(!showAiMsgGen)}
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+        >
+          <MessageSquare className="w-4 h-4" />
+          {showAiMsgGen ? 'Close AI Message Generator' : 'AI Message Generator'}
+        </button>
+        {showAiMsgGen && (
+          <div className="mt-6">
+            <AiMessageGenerator />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
