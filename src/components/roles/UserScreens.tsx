@@ -2305,6 +2305,7 @@ interface ReceptionistProps {
   onCheckOutGuest: (id: string) => void;
   onRegisterGuestCRM: (guest: GuestCRM) => void;
   onAddNotification: (n: SystemNotification) => void;
+  onOpenAiAgent: (guest: { guestName: string; phone: string; roomNo: string } | null) => void;
   serviceRequests: ServiceRequest[];
   onUpdateServiceRequestStatus: (id: string, next: ServiceRequestStatus, staff?: string) => void;
   onApproveRoomInspection: (roomId: string) => void;
@@ -2323,6 +2324,7 @@ export function ReceptionistScreen({
   onCheckOutGuest,
   onRegisterGuestCRM,
   onAddNotification,
+  onOpenAiAgent,
   serviceRequests,
   onUpdateServiceRequestStatus,
   onApproveRoomInspection,
@@ -2622,12 +2624,31 @@ export function ReceptionistScreen({
               </select>
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-primary text-on-primary py-2.5 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-black transition-all cursor-pointer shadow-sm"
-            >
-              Sign & Check-In
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!walkinName.trim() || !walkinPhone.trim()) {
+                    alert('Please enter guest name and phone number before opening the AI message generator.');
+                    return;
+                  }
+                  onOpenAiAgent({
+                    guestName: walkinName,
+                    phone: walkinPhone,
+                    roomNo: selectedRoomId || '402'
+                  });
+                }}
+                className="w-full bg-[#a89078] text-white py-2.5 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-black transition-all cursor-pointer shadow-sm"
+              >
+                Open AI Message Generator
+              </button>
+              <button
+                type="submit"
+                className="w-full bg-primary text-on-primary py-2.5 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-black transition-all cursor-pointer shadow-sm"
+              >
+                Sign & Check-In
+              </button>
+            </div>
           </form>
         </div>
 
@@ -2773,6 +2794,19 @@ export function ReceptionistScreen({
                   </div>
 
                   <div className="pt-2.5 border-t border-dashed border-zinc-200">
+                    <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => onOpenAiAgent({
+                        guestName: foundGuest.fullName,
+                        phone: foundGuest.phone,
+                        roomNo: foundGuest.checkedInRoom || '402'
+                      })}
+                      className="w-full inline-flex items-center justify-center gap-1.5 bg-[#a89078] hover:bg-black text-white text-[10px] font-black uppercase tracking-wider py-2 px-3 rounded-lg cursor-pointer transition-colors shadow-sm"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Open AI Message Generator
+                    </button>
                     <a
                       href={`https://api.whatsapp.com/send?phone=${foundGuest.phone.replace(/\D/g, '')}&text=${encodeURIComponent(`Hello ${foundGuest.fullName}, welcome to TRANQUIL HAVEN! Your checked-in room is Room ${foundGuest.checkedInRoom || '402'}. Click the secure link to instantly launch your personalized digital guest mobile portal: ${window.location.origin}${window.location.pathname}?role=Guest&room=${foundGuest.checkedInRoom || '402'}&guest=${encodeURIComponent(foundGuest.fullName)}&guestId=${foundGuest.id}&phone=${encodeURIComponent(foundGuest.phone)}`)}`}
                       target="_blank"
@@ -2782,6 +2816,7 @@ export function ReceptionistScreen({
                       <MessageSquare className="w-3.5 h-3.5" />
                       Dispatch Port Link via WhatsApp
                     </a>
+                  </div>
                   </div>
                 </div>
               ) : (

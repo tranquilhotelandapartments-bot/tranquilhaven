@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Room, Reservation, MaintenanceTicket } from '../types';
 
@@ -11,6 +11,7 @@ interface AiAgentTabProps {
   rooms: Room[];
   reservations: Reservation[];
   tickets: MaintenanceTicket[];
+  guestForMessage?: { guestName: string; phone: string; roomNo: string } | null;
 }
 
 interface ReportData {
@@ -39,12 +40,23 @@ interface ReportData {
   recommendations: string[];
 }
 
-export default function AiAgentTab({ rooms, reservations, tickets }: AiAgentTabProps) {
+export default function AiAgentTab({ rooms, reservations, tickets, guestForMessage }: AiAgentTabProps) {
   const [selectedFocus, setSelectedFocus] = useState<string>('Operational Balance');
   const [customBrief, setCustomBrief] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingStep, setLoadingStep] = useState<string>('');
   const [report, setReport] = useState<ReportData | null>(null);
+  const [messageDraft, setMessageDraft] = useState<string>('');
+  const [channel, setChannel] = useState<'WhatsApp' | 'SMS'>('WhatsApp');
+  const [templateHint, setTemplateHint] = useState<string>('Hello Guest, your room is ready.');
+
+  useEffect(() => {
+    if (!guestForMessage) return;
+
+    const draft = `Hello ${guestForMessage.guestName},\n\nWelcome to TRANQUIL HAVEN! Your stay has been confirmed in Room ${guestForMessage.roomNo}. We are here to ensure your check-in is seamless and comfortable.\n\nPlease use this link to access your personalized guest portal and request concierge services anytime:\n${window.location.origin}/?role=Guest&room=${guestForMessage.roomNo}&guest=${encodeURIComponent(guestForMessage.guestName)}&guestId=${encodeURIComponent(guestForMessage.guestName)}&phone=${encodeURIComponent(guestForMessage.phone)}\n\nIf you would like, I can refine this message to include a payment confirmation, reservation reminder, or welcome note.`;
+    setMessageDraft(draft);
+    setTemplateHint('Use this draft to send a prebuilt WhatsApp message to the registered guest.');
+  }, [guestForMessage]);
 
   const focusOptions = [
     { id: 'Operational Balance', label: 'Overall Operations Audit', desc: 'Evaluates general room occupancy, housekeeping turnaround speeds, and facility ticket backlogs.' },
@@ -535,7 +547,68 @@ export default function AiAgentTab({ rooms, reservations, tickets }: AiAgentTabP
 
         {/* Right Side: Render Result matching reference image */}
         <div className="lg:col-span-2 space-y-4">
-          
+          {guestForMessage && (
+            <div className="bg-[#fdf8ef] border border-[#f2e8dc] rounded-2xl p-4 shadow-sm space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#a07b4c]">Guest WhatsApp Message Composer</p>
+                  <h3 className="font-display font-black text-base text-[#2c2319]">Draft and send a tailored message to {guestForMessage.guestName}</h3>
+                </div>
+                <div className="space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(messageDraft);
+                      window.alert('Message draft copied to clipboard.');
+                    }}
+                    className="inline-flex items-center gap-2 bg-black text-white text-[10px] uppercase tracking-wider font-bold px-3 py-2 rounded-lg"
+                  >
+                    Copy Draft
+                  </button>
+                  <a
+                    href={`https://api.whatsapp.com/send?phone=${guestForMessage.phone.replace(/\D/g, '')}&text=${encodeURIComponent(messageDraft)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#25d366] text-white text-[10px] uppercase tracking-wider font-bold px-3 py-2 rounded-lg"
+                  >
+                    Open WhatsApp
+                  </a>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#5f5133]">Guest</div>
+                  <div className="text-sm font-semibold text-[#1d1a16]">{guestForMessage.guestName}</div>
+                  <div className="text-[11px] text-[#6c5b45]">Phone: {guestForMessage.phone}</div>
+                  <div className="text-[11px] text-[#6c5b45]">Room: {guestForMessage.roomNo}</div>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.28em] text-[#5f5133]">Channel</label>
+                  <select
+                    value={channel}
+                    onChange={(e) => setChannel(e.target.value as 'WhatsApp' | 'SMS')}
+                    className="w-full bg-white border border-[#e8dfce] rounded-xl px-3 py-2 text-sm"
+                  >
+                    <option value="WhatsApp">WhatsApp</option>
+                    <option value="SMS">SMS</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.3em] text-[#5f5133] mb-2">Message Draft</label>
+                <textarea
+                  rows={6}
+                  value={messageDraft}
+                  onChange={(e) => setMessageDraft(e.target.value)}
+                  className="w-full bg-white border border-[#e8dfce] rounded-2xl px-4 py-3 text-sm text-[#1d1a16] focus:outline-none focus:ring-2 focus:ring-[#a89078]"
+                />
+                <p className="text-[10px] text-[#7e6c56] mt-2">{templateHint}</p>
+              </div>
+            </div>
+          )}
+
           <AnimatePresence mode="wait">
             {/* Loading state rendering dynamic analytical logs */}
             {isLoading && (

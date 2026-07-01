@@ -186,6 +186,12 @@ export default function App() {
   };
 
   const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
+  const [aiTargetGuest, setAiTargetGuest] = useState<{ guestName: string; phone: string; roomNo: string } | null>(null);
+
+  const openAiAgent = (guest: { guestName: string; phone: string; roomNo: string } | null = null) => {
+    setAiTargetGuest(guest);
+    setMobileTab('ai-agent');
+  };
 
   const [messages, setMessagesRaw] = useState<InternalMessage[]>(() => {
     const saved = localStorage.getItem('th_messages');
@@ -966,6 +972,12 @@ export default function App() {
       message: smsMessage
     });
 
+    openAiAgent({
+      guestName: guest.fullName,
+      phone: guest.phone,
+      roomNo: guest.checkedInRoom || '402'
+    });
+
     // Attempt to send WhatsApp invitation automatically via backend
     try {
       const resp = await fetch('/api/send-whatsapp', {
@@ -1442,7 +1454,7 @@ export default function App() {
               <h3 className="text-lg font-bold tracking-tight">{callName}</h3>
               <p className="text-xs text-[#a89078] font-bold uppercase tracking-widest">VoIP Connection Active</p>
               <p className="text-sm font-mono text-zinc-400 mt-2">
-                {Math.xs || Math.floor(callTimer / 60)}:{(callTimer % 60).toString().padStart(2, '0')}
+                {Math.floor(callTimer / 60)}:{(callTimer % 60).toString().padStart(2, '0')}
               </p>
             </div>
             
@@ -1561,6 +1573,7 @@ export default function App() {
                       onAddMessage={handleAddMessage} onAddReservation={handleAddReservation}
                       onCheckInGuest={handleCheckInGuest} onCheckOutGuest={handleCheckOutGuest}
                       onRegisterGuestCRM={handleRegisterGuestCRM} onAddNotification={handleAddNotification}
+                      onOpenAiAgent={openAiAgent}
                       serviceRequests={serviceRequests} onUpdateServiceRequestStatus={handleUpdateServiceRequestStatus}
                       onApproveRoomInspection={handleApproveRoomInspection} onDeleteServiceRequest={handleDeleteServiceRequest}
                       onPostFinancial={handlePostFinancial}
@@ -1631,12 +1644,7 @@ export default function App() {
                   <div className="bg-[#a89078]/10 border border-[#a89078]/25 p-3.5 rounded-xl text-[10.5px] text-[#554a3e] leading-relaxed font-sans text-left">
                     <strong>Tranquil AI Smart Assistant:</strong> Type queries below to examine system margins, check suites cleaning turnarounds, or generate report files.
                   </div>
-                  <AiAgentTab rooms={rooms} reservations={reservations} tickets={tickets} />
-                </div>
-              )}
-
-              {mobileTab === 'more' && (
-                <div className="space-y-8">
+                      <AiAgentTab rooms={rooms} reservations={reservations} tickets={tickets} guestForMessage={aiTargetGuest} />
                   {/* User Profile Overview */}
                   <div className={`p-4 rounded-2xl border flex items-center gap-3.5 text-left ${themeMode === 'dark' ? 'bg-zinc-900/60 border-zinc-850' : 'bg-white border-zinc-200'}`}>
                     <img 
@@ -2131,6 +2139,7 @@ export default function App() {
                         onCheckOutGuest={handleCheckOutGuest}
                         onRegisterGuestCRM={handleRegisterGuestCRM}
                         onAddNotification={handleAddNotification}
+                        onOpenAiAgent={openAiAgent}
                         serviceRequests={serviceRequests}
                         onUpdateServiceRequestStatus={handleUpdateServiceRequestStatus}
                         onApproveRoomInspection={handleApproveRoomInspection}
