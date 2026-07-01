@@ -2331,6 +2331,7 @@ export function ManagerScreen({
 // ==========================================
 interface ReceptionistProps {
   rooms: Room[];
+  setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
   reservations: Reservation[];
   guests: GuestCRM[];
   messages: InternalMessage[];
@@ -2350,6 +2351,7 @@ interface ReceptionistProps {
 
 export function ReceptionistScreen({
   rooms,
+  setRooms,
   reservations,
   guests,
   messages,
@@ -2482,7 +2484,9 @@ export function ReceptionistScreen({
     };
 
     onAddReservation(newResObj);
-    onCheckInGuest(selectedRoomId);
+    // Mark room as Occupied directly (avoids double-posting revenue from onCheckInGuest)
+    const todayStr = new Date().toISOString().split('T')[0];
+    setRooms(rooms.map(r => r.id === selectedRoomId ? { ...r, status: 'Occupied', subStatus: 'CHECKED_IN', lastOccupiedDate: todayStr, guestName: walkinName } : r));
 
     const priceAmount = Number(walkinPrice) || 350000;
 

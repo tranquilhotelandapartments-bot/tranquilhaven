@@ -1570,7 +1570,7 @@ export default function App() {
 
                   {effectiveRole === 'Receptionist' && (
                     <ReceptionistScreen 
-                      rooms={rooms} reservations={reservations} guests={guests} messages={messages}
+                      rooms={rooms} setRooms={setRooms} reservations={reservations} guests={guests} messages={messages}
                       onAddMessage={handleAddMessage} onAddReservation={handleAddReservation}
                       onCheckInGuest={handleCheckInGuest} onCheckOutGuest={handleCheckOutGuest}
                       onRegisterGuestCRM={handleRegisterGuestCRM} onAddNotification={handleAddNotification}
@@ -2144,6 +2144,7 @@ export default function App() {
 
                       <ReceptionistScreen 
                         rooms={rooms}
+                        setRooms={setRooms}
                         reservations={reservations}
                         guests={guests}
                         messages={messages}
